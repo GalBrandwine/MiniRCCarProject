@@ -1,0 +1,6 @@
+services:
+  rccarproject:
+    image: rccarproject
+    build:
+      context: .
+      dockerfile: ./Dockerfile
