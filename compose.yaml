@@ -1,0 +1,11 @@
+services:
+  rccarproject:
+    image: rccarproject
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    stdin_open: true # keeps stdin open (equivalent to docker run -i)
+    tty: true # allocates a pseudo-TTY (equivalent to docker run -t)
+    volumes:
+      - .:/workspace
+    working_dir: /workspace

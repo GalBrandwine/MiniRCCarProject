@@ -1,138 +1,74 @@
-# Zephyr Example Application
+# MiniRCCarProject
 
-<a href="https://github.com/zephyrproject-rtos/example-application/actions/workflows/build.yml?query=branch%3Amain">
-  <img src="https://github.com/zephyrproject-rtos/example-application/actions/workflows/build.yml/badge.svg?event=push">
-</a>
-<a href="https://github.com/zephyrproject-rtos/example-application/actions/workflows/docs.yml?query=branch%3Amain">
-  <img src="https://github.com/zephyrproject-rtos/example-application/actions/workflows/docs.yml/badge.svg?event=push">
-</a>
-<a href="https://zephyrproject-rtos.github.io/example-application">
-  <img alt="Documentation" src="https://img.shields.io/badge/documentation-3D578C?logo=sphinx&logoColor=white">
-</a>
-<a href="https://zephyrproject-rtos.github.io/example-application/doxygen">
-  <img alt="API Documentation" src="https://img.shields.io/badge/API-documentation-3D578C?logo=c&logoColor=white">
-</a>
+## Basic Usage
 
-This repository contains a Zephyr example application. The main purpose of this
-repository is to serve as a reference on how to structure Zephyr-based
-applications. Some of the features demonstrated in this example are:
+```bash
+# Build the image (takes a while — SDK download is large)
+DOCKER_BUILDKIT=0 docker build -t my-zephyr-dev .  
 
-- Basic [Zephyr application][app_dev] skeleton
-- [Zephyr workspace applications][workspace_app]
-- [Zephyr modules][modules]
-- [West T2 topology][west_t2]
-- [Custom boards][board_porting]
-- Custom [devicetree bindings][bindings]
-- Out-of-tree [drivers][drivers]
-- Out-of-tree libraries
-- Example CI configuration (using GitHub Actions)
-- Custom [west extension][west_ext]
-- Custom [Zephyr runner][runner_ext]
-- Doxygen and Sphinx documentation boilerplate
+# Run with your project mounted
+docker run -it --rm -v $(pwd):/workspace my-zephyr-dev
 
-This repository is versioned together with the [Zephyr main tree][zephyr]. This
-means that every time that Zephyr is tagged, this repository is tagged as well
-with the same version number, and the [manifest](west.yml) entry for `zephyr`
-will point to the corresponding Zephyr tag. For example, the `example-application`
-v2.6.0 will point to Zephyr v2.6.0. Note that the `main` branch always
-points to the development branch of Zephyr, also `main`.
-
-[app_dev]: https://docs.zephyrproject.org/latest/develop/application/index.html
-[workspace_app]: https://docs.zephyrproject.org/latest/develop/application/index.html#zephyr-workspace-app
-[modules]: https://docs.zephyrproject.org/latest/develop/modules.html
-[west_t2]: https://docs.zephyrproject.org/latest/develop/west/workspaces.html#west-t2
-[board_porting]: https://docs.zephyrproject.org/latest/guides/porting/board_porting.html
-[bindings]: https://docs.zephyrproject.org/latest/guides/dts/bindings.html
-[drivers]: https://docs.zephyrproject.org/latest/reference/drivers/index.html
-[zephyr]: https://github.com/zephyrproject-rtos/zephyr
-[west_ext]: https://docs.zephyrproject.org/latest/develop/west/extensions.html
-[runner_ext]: https://docs.zephyrproject.org/latest/develop/modules.html#external-runners
-
-## Getting Started
-
-Before getting started, make sure you have a proper Zephyr development
-environment. Follow the official
-[Zephyr Getting Started Guide](https://docs.zephyrproject.org/latest/getting_started/index.html).
-
-### Initialization
-
-The first step is to initialize the workspace folder (``my-workspace``) where
-the ``example-application`` and all Zephyr modules will be cloned. Run the following
-command:
-
-```shell
-# initialize my-workspace for the example-application (main branch)
-west init -m https://github.com/zephyrproject-rtos/example-application --mr main my-workspace
-# update Zephyr modules
-cd my-workspace
-west update
+# Inside the container, build a sample
+cd /home/zephyr/zephyrproject/zephyr
+west build -p always -b qemu_cortex_m3 samples/basic/blinky
 ```
 
-### Building and running
+## Starting from Zephyr Example Project
 
-To build the application, run the following command:
+### Getting started from scratch
 
-```shell
-cd example-application
-west build -b $BOARD app
+The [zephyr example application](https://github.com/zephyrproject-rtos/example-application) is the official template for out-of-tree Zephyr apps.  
+It gives the correct `west.yml`, CMake structure, and CI setup from the start.
+
+**On your host machine:**
+
+```bash
+cd ~/dev
+# Clone the example app as your project (don't clone into RCCarProject, let it create the folder)
+git clone https://github.com/zephyrproject-rtos/example-application RCCarProject
+cd RCCarProject
+
+# Point it at your own GitHub repo
+git remote set-url origin https://github.com/<your-username>/RCCarProject.git
+git push -u origin main
 ```
 
-where `$BOARD` is the target board.
+**Build the Docker Image (installing Zephyr, and other stuff):**
 
-You can use the `custom_plank` board found in this
-repository. Note that Zephyr sample boards may be used if an
-appropriate overlay is provided (see `app/boards`).
+```bash
+# Either manually build
+DOCKER_BUILDKIT=0 docker build --no-cache -t rccarproject .
 
-A sample debug configuration is also provided. To apply it, run the following
-command:
+# OR use the docker-compose.yaml from scratch:
+docker compose -f compose.debug.yaml build --no-cache
+docker compose -f compose.debug.yaml up -d
 
-```shell
-west build -b $BOARD app -- -DEXTRA_CONF_FILE=debug.conf
+# When developing use:
+docker compose -f 'compose.debug.yaml' up -d --build 'rccarproject' 
 ```
 
-Once you have built the application, run the following command to flash it:
+**Then initialize the west workspace around it:**
 
-```shell
-west flash
+Inside the container:
+
+```bash
+cd /home/zephyr
+west init -l /workspace        # -l means "local manifest", uses the west.yml already in your repo
+west update                    # pulls zephyr + modules declared in west.yml
+west zephyr-export
 ```
 
-### Testing
+The `-l` flag is the key difference from what the Dockerfile does — instead of pulling Zephyr first and your app second, it treats your repo as the manifest and pulls Zephyr as a dependency. That's the proper out-of-tree app model.
 
-To execute Twister integration tests, run the following command:
+**What you'll get:**
 
-```shell
-west twister -T tests --integration
+```text
+RCCarProject/        ← your git repo / west manifest
+├── app/             ← your application source
+├── boards/          ← custom board definitions
+├── drivers/         ← custom drivers
+├── dts/             ← custom devicetree bindings
+├── west.yml         ← declares zephyr version dependency
+└── CMakeLists.txt
 ```
-
-### Documentation
-
-A minimal documentation setup is provided for Doxygen and Sphinx. To build the
-documentation first change to the ``doc`` folder:
-
-```shell
-cd doc
-```
-
-Before continuing, check if you have Doxygen installed. It is recommended to
-use the same Doxygen version used in [CI](.github/workflows/docs.yml). To
-install Sphinx, make sure you have a Python installation in place and run:
-
-```shell
-pip install -r requirements.txt
-```
-
-API documentation (Doxygen) can be built using the following command:
-
-```shell
-doxygen
-```
-
-The output will be stored in the ``_build_doxygen`` folder. Similarly, the
-Sphinx documentation (HTML) can be built using the following command:
-
-```shell
-make html
-```
-
-The output will be stored in the ``_build_sphinx`` folder. You may check for
-other output formats other than HTML by running ``make help``.
