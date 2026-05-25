@@ -6,6 +6,8 @@ services:
       dockerfile: ./Dockerfile
     stdin_open: true # keeps stdin open (equivalent to docker run -i)
     tty: true # allocates a pseudo-TTY (equivalent to docker run -t)
+    privileged: true # gives access to all host devices
     volumes:
-      - .:/workspace
-    working_dir: /workspace
+      - .:/home/zephyr/workspace/app
+      - /dev:/dev # exposes all USB devices as they're plugged in
+    working_dir: /home/zephyr/workspace/app

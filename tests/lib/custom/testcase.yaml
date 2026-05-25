@@ -3,6 +3,7 @@ common:
   integration_platforms:
     - custom_plank
     - qemu_cortex_m0
+    - esp32_devkitc/esp32/procpu
 tests:
   lib.custom: {}
   lib.custom.non_default:

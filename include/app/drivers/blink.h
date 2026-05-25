@@ -35,7 +35,8 @@
  */
 
 /** @brief Blink driver class operations */
-__subsystem struct blink_driver_api {
+__subsystem struct blink_driver_api
+{
 	/**
 	 * @brief Configure the LED blink period.
 	 *
@@ -77,10 +78,10 @@ __subsystem struct blink_driver_api {
  * @retval -errno Other negative errno code on failure.
  */
 __syscall int blink_set_period_ms(const struct device *dev,
-				  unsigned int period_ms);
+								  unsigned int period_ms);
 
 static inline int z_impl_blink_set_period_ms(const struct device *dev,
-					     unsigned int period_ms)
+											 unsigned int period_ms)
 {
 	__ASSERT_NO_MSG(DEVICE_API_IS(blink, dev));
 

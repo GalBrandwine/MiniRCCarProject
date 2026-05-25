@@ -1,0 +1,36 @@
+{
+    "name": "RC Car Zephyr Dev",
+    "dockerComposeFile": "../compose.yaml",
+    "service": "rccarproject",
+    "workspaceFolder": "/home/zephyr/workspace/app",
+    "remoteUser": "zephyr",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-vscode.cpptools",
+                "ms-vscode.cpptools-extension-pack",
+                "twxs.cmake",
+                "ms-vscode.cmake-tools",
+                "marus25.cortex-debug",
+                "ms-vscode.vscode-serial-monitor",
+                "plorefice.devicetree",
+                "nordic-semiconductor.nrf-kconfig"
+            ],
+            "settings": {
+                "terminal.integrated.defaultProfile.linux": "zsh",
+                "C_Cpp.default.compilerPath": "/home/zephyr/zephyr-sdk-1.0.1/arm-zephyr-eabi/bin/arm-zephyr-eabi-gcc",
+                "C_Cpp.default.includePath": [
+                    "${workspaceFolder}/**",
+                    "/home/zephyr/workspace/zephyr/include/**",
+                    "/home/zephyr/workspace/zephyr/kernel/include/**",
+                    "/home/zephyr/workspace/zephyr/arch/arm/include/**"
+                ],
+                "C_Cpp.default.defines": [
+                    "__ZEPHYR__=1"
+                ],
+                "cmake.configureOnOpen": false,
+                "cortex-debug.armToolchainPath": "/home/zephyr/zephyr-sdk-1.0.1/arm-zephyr-eabi/bin"
+            }
+        }
+    }
+}
