@@ -1,0 +1,33 @@
+# Copyright (c) 2024 Nordic Semiconductor ASA
+# SPDX-License-Identifier: Apache-2.0
+
+description: |
+  A generic binding for a GPIO-controlled 2-channel remote control. Note that this binding
+  has no vendor prefix, as it does not target a specific device or vendor.
+
+  Example definition in devicetree:
+
+    remote-controll-gpio-2ch {
+        compatible = "remote-controll-gpio-2ch";
+        left-gpios = <&gpio0 0 GPIO_ACTIVE_HIGH>;
+        right-gpios = <&gpio0 1 GPIO_ACTIVE_HIGH>;
+    };
+
+compatible: "remote-controll-gpio-2ch"
+
+include: base.yaml
+
+properties:
+  left-gpios:
+    type: phandle-array
+    required: true
+    description: GPIO-controlled left channel.
+
+  right-gpios:
+    type: phandle-array
+    required: true
+    description: GPIO-controlled right channel.
+
+  # blink-period-ms:
+  #   type: int
+  #   description: Initial blinking period in milliseconds.

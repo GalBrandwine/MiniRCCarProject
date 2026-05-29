@@ -13,7 +13,7 @@ description: |
         blink-period-ms = <1000>;
     };
 
-compatible: "blink-gpio-led"
+compatible: "2ch-remote-controll"
 
 include: base.yaml
 

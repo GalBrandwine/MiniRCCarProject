@@ -15,10 +15,16 @@
 	// 	input-gpios = <&gpio 13 (GPIO_PULL_UP | GPIO_ACTIVE_LOW)>;
 	// };
 
-	blink_led: blink-led {
-		compatible = "blink-gpio-led";
-		led-gpios = <&gpio 13 GPIO_ACTIVE_HIGH>;
-		blink-period-ms = <1000>;
+	// blink_led: blink-led {
+	// 	compatible = "blink-gpio-led";
+	// 	led-gpios = <&gpio 13 GPIO_ACTIVE_HIGH>;
+	// 	blink-period-ms = <1000>;
+	// };
+
+	remote_controll: remote-controll {
+		compatible = "remote-controll-gpio-2ch";
+		left-gpios = <&gpio 14 GPIO_ACTIVE_HIGH>;
+		right-gpios = <&gpio 15 GPIO_ACTIVE_HIGH>;
 	};
 };
 
