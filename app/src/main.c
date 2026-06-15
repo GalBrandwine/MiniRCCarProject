@@ -82,9 +82,14 @@ int main(void)
 		// 	blink_set_period_ms(blink, period_ms);
 		// }
 
-		last_val = val;
-
-		k_sleep(K_MSEC(100));
+		// last_val = val;
+		LOG_INF("Turning left");
+		DEVICE_API_GET(remote_controll_2ch, remote_controll_2ch_dev)->turn_left(remote_controll_2ch_dev);
+		k_sleep(K_MSEC(1000));
+		// DEVICE_API_GET(remote_controll_2ch, remote_controll_2ch_dev)->turn_right(remote_controll_2ch_dev);
+		// k_sleep(K_MSEC(1000));
+		DEVICE_API_GET(remote_controll_2ch, remote_controll_2ch_dev)->center(remote_controll_2ch_dev);
+		k_sleep(K_MSEC(1000));
 	}
 
 	return 0;

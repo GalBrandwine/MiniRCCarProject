@@ -9,12 +9,10 @@
             "extensions": [
                 "ms-vscode.cpptools",
                 "ms-vscode.cpptools-extension-pack",
-                "twxs.cmake",
                 "ms-vscode.cmake-tools",
-                "marus25.cortex-debug",
-                "ms-vscode.vscode-serial-monitor",
+                "twxs.cmake",
                 "plorefice.devicetree",
-                "nordic-semiconductor.nrf-kconfig"
+                "nordic-semiconductor.nrf-connect-extension-pack"
             ],
             "settings": {
                 "terminal.integrated.defaultProfile.linux": "zsh",

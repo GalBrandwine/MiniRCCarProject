@@ -60,7 +60,26 @@ __subsystem struct remote_controll_2ch_driver_api
 	 * @retval -errno Other negative errno code on failure.
 	 */
 	int (*turn_left)(const struct device *dev);
+	/**
+	 * @brief Turn the remote control right.
+	 *
+	 * @param dev 2ch_remote_controll device instance.
+	 *
+	 * @retval 0 if successful.
+	 * @retval -EINVAL if @p period_ms can not be set.
+	 * @retval -errno Other negative errno code on failure.
+	 */
 	int (*turn_right)(const struct device *dev);
+	/**
+	 * @brief Center the remote control.
+	 *
+	 * @param dev 2ch_remote_controll device instance.
+	 *
+	 * @retval 0 if successful.
+	 * @retval -EINVAL if @p period_ms can not be set.
+	 * @retval -errno Other negative errno code on failure.
+	 */
+	int (*center)(const struct device *dev);
 };
 
 /** @} */

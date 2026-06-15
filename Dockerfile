@@ -56,6 +56,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     zsh \
     fonts-powerline \
     vim \
+    # J-Link / ESP-PROG GUI dependencies (needed for dpkg install of JLink .deb)
+    libxcb-render0 \
+    libxcb-render-util0 \
+    libxcb-shape0 \
+    libxcb-icccm4 \
+    libxcb-keysyms1 \
+    libxcb-image0 \
+    libxkbcommon-x11-0 \
     && locale-gen en_US.UTF-8 \
     && rm -rf /var/lib/apt/lists/*
 
@@ -94,7 +102,9 @@ RUN pip install --upgrade pip wheel \
 
 # ── Zephyr SDK ───────────────────────────────────────────────
 ARG ZEPHYR_SDK_VERSION=1.0.1
-ARG ZEPHYR_SDK_TOOLCHAINS="-t arm-zephyr-eabi"
+# Edit ZEPHYR_SDK_TOOLCHAINS to add more targets, e.g.:
+#   "-t arm-zephyr-eabi -t riscv64-zephyr-elf"
+ARG ZEPHYR_SDK_TOOLCHAINS="-t xtensa-espressif_esp32_zephyr-elf"
 
 ENV ZEPHYR_SDK_INSTALL_DIR=/home/${USERNAME}/zephyr-sdk-${ZEPHYR_SDK_VERSION}
 
@@ -104,6 +114,16 @@ RUN wget -q \
     && rm   "zephyr-sdk-${ZEPHYR_SDK_VERSION}_linux-x86_64_gnu.tar.xz" \
     && cd ${ZEPHYR_SDK_INSTALL_DIR} \
     && ./setup.sh -c ${ZEPHYR_SDK_TOOLCHAINS}
+
+# ── Espressif OpenOCD ─────────────────────────────────────────
+# Required for ESP32 JTAG debugging via ESP-PROG or J-Link.
+# Uses Espressif's fork which includes ESP32-specific patches and
+# Zephyr RTOS thread awareness support for Xtensa targets.
+ARG OPENOCD_ESP32_VERSION=0.12.0-esp32-20251215
+RUN wget -q \
+    "https://github.com/espressif/openocd-esp32/releases/download/v${OPENOCD_ESP32_VERSION}/openocd-esp32-linux-amd64-${OPENOCD_ESP32_VERSION}.tar.gz" \
+    && tar -xf "openocd-esp32-linux-amd64-${OPENOCD_ESP32_VERSION}.tar.gz" \
+    && rm "openocd-esp32-linux-amd64-${OPENOCD_ESP32_VERSION}.tar.gz"
 
 # ── West workspace ───────────────────────────────────────────
 # Bootstrap with upstream Zephyr manifest — no app mounted yet at build time.
@@ -119,7 +139,8 @@ RUN mkdir -p /home/${USERNAME}/workspace \
     && cd /home/${USERNAME}/workspace \
     && west update \
     && west zephyr-export \
-    && pip install -r ${ZEPHYR_BASE}/scripts/requirements.txt
+    && pip install -r ${ZEPHYR_BASE}/scripts/requirements.txt \
+    && west packages pip --install
 
 # ── Environment ──────────────────────────────────────────────
 ENV ZEPHYR_TOOLCHAIN_VARIANT=zephyr
@@ -131,6 +152,8 @@ RUN echo 'export VIRTUAL_ENV_DISABLE_PROMPT=1'                                  
     && echo "source ${ZEPHYR_BASE}/zephyr-env.sh 2>/dev/null || true"                 >> ~/.zshrc \
     # Set ZEPHYR_EXTRA_MODULES at runtime only (app bind-mount is present then)
     && echo 'export ZEPHYR_EXTRA_MODULES=/home/zephyr/workspace/app'                  >> ~/.zshrc \
+    # Add Espressif OpenOCD to PATH
+    && echo 'export PATH=$PATH:/home/zephyr/openocd-esp32/bin'                        >> ~/.zshrc \
     && echo 'echo ""'                                                                  >> ~/.zshrc \
     && echo 'echo "  Zephyr workspace : /home/zephyr/workspace"'                      >> ~/.zshrc \
     && echo 'echo "  Your app         : /home/zephyr/workspace/app (bind-mount)"'     >> ~/.zshrc \

@@ -259,9 +259,10 @@ west flash --esp-device /dev/ttyUSB0
 
 ## Debugging within the container
 
-To debug you need a JTAG.
+### SEGGER JLINK's Configuringn.
 
-Good news — J-Link supports ESP32 via JTAG. Here's the full setup:
+I have J-Link at home. But it supports only ESP32-3C via JTAG. 
+Ill keep the full setup here if needed next time:
 
 **1. Wire J-Link to ESP32 DevKitC**
 
@@ -286,6 +287,130 @@ wget -q https://www.segger.com/downloads/jlink/JLink_Linux_x86_64.tgz
 tar -xf JLink_Linux_x86_64.tgz
 sudo cp -r JLink_Linux_x86_64/* /usr/local/
 ```
+**One caveat:** Cortex-Debug is designed for ARM. ESP32 is Xtensa, so you may need the **ESP-IDF extension** or **OpenOCD** instead of J-Link's GDB server for full support.
+
+
+### ESP-PROG Configuration
+
+![ESP32-prog](/home/zephyr/workspace/app/doc/ESP32-prog.png)
+
+I've bought this [ESP32-programmer](https://he.aliexpress.com/item/4001296786022.html?spm=a2g0o.order_list.order_list_main.41.67b41802sdK85M&gatewayAdapt=glo2isr)
+
+It Features:
+ 
+1. ESP-Prog is a development and debugging tool with automatic download firmware, serial communication, JTAG online debugging and other functions. The automatic download firmware and serial communication functions are available for the ESP8266 and ESP32 platforms, and the JTAG in-circuit debugging function is available for the ESP32 platform.
+2. ESP-Prog is easy to use and can be connected to a computer with only one USB cable. The computer can recognize the download function and the two ports corresponding to the JTAG function.
+3. ESP-Prog can be connected to the user board using the cable. The connector is available in 2.54 mm and 1.27 mm pitch packages with a foolproof design. The user board is required to place the Program (6-Pin) and JTAG (10-Pin) connectors in the corresponding order.
+4. Considering that the power supply voltage of different user boards may be different, the two interfaces of ESP-Prog can select 5V or 3.3V power supply through Pin Header, which has strong power compatibility.
+ 
+Product description:
+ 
+Size: 73.4mm * 25.1mm
+Interface: Program; JTAG
+ 
+Steps for usage:
+ 
+1. Connect the ESP-Prog debug board and the USB port on the computer via a USB cable.
+2. Install the FT2232HL chip driver on the computer side. The computer recognizes two ports, indicating that the driver has been successfully installed.
+3. Use the Pin header to select the power supply output voltage on the Program/JTAG interface.
+4. Connect the debug board and ESP product board with the gray cable.
+5. Automatic download and JTAG debugging of the ESP32 product board can be achieved using official software tools or scripts.
+
+Some good Good news — ESP-PROG is natively supported by OpenOCD with no extra setup needed. 
+Here's what to do:
+
+**Step 1 — Verify the container sees it:**
+```bash
+ls /dev/ttyUSB*
+```
+You should see two ports — `ttyUSB0` and `ttyUSB1` and `ttyUSB2`. ESP-PROG creates two:
+- `ttyUSB0` — ESP32 (Maybe need to disconnect)
+- `ttyUSB1` — JTAG
+- `ttyUSB2` — UART (serial/flash)
+
+**Step 2 — Update your OpenOCD config**  In `.vscode/esp32-esprog.cfg`:
+
+```tcl
+set ESP_RTOS none
+set ESP_ONLYCPU 1
+source [find interface/ftdi/esp32_devkitj_v1.cfg]
+source [find target/esp32.cfg]
+```
+This is the config that was originally in the Zephyr board support — it was written exactly for ESP-PROG.
+
+**Step 3 — Update `launch.json`:**
+```json
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "ESP32 ESP-PROG Debug",
+      "type": "cortex-debug",
+      "request": "launch",
+      "servertype": "openocd",
+      "executable": "${workspaceFolder}/build/zephyr/zephyr.elf",
+      "runToEntryPoint": "main",
+      "toolchainPath": "/home/zephyr/zephyr-sdk-1.0.1/gnu/xtensa-espressif_esp32_zephyr-elf/bin",
+      "toolchainPrefix": "xtensa-espressif_esp32_zephyr-elf",
+      "gdbPath": "/home/zephyr/zephyr-sdk-1.0.1/gnu/xtensa-espressif_esp32_zephyr-elf/bin/xtensa-espressif_esp32_zephyr-elf-gdb",
+      "openOCDPath": "/home/zephyr/openocd-esp32/bin/openocd",
+      "configFiles": [
+        "${workspaceFolder}/.vscode/esp32-esprog.cfg"
+      ],
+      "searchDir": [
+        "/home/zephyr/openocd-esp32/share/openocd/scripts"
+      ],
+      "preLaunchTask": "west build debug"
+    }
+  ]
+}
+```
+
+**Step 4 — Wire ESP-PROG to NodeMCU:**
+
+| ESP-PROG JTAG | NodeMCU |
+|---|---|
+| VDD (3.3V) | 3.3V |
+| GND | GND |
+| TDI | GPIO12 |
+| TDO | GPIO15 |
+| TCK | GPIO13 |
+| TMS | GPIO14 |
+| EN | EN (optional) |
+
+**Step 5 — Test OpenOCD manually first:**
+```bash
+/home/zephyr/openocd-esp32/bin/openocd \
+  -s /home/zephyr/openocd-esp32/share/openocd/scripts \
+  -f /home/zephyr/workspace/app/.vscode/esp32-esprog.cfg
+```
+
+You should see:
+```
+Info : esp32.cpu0: hardware has 2 breakpoints, 2 watchpoints
+```
+
+If no openocd, install manually:
+
+```bash
+cd /home/zephyr
+wget https://github.com/espressif/openocd-esp32/releases/download/v0.12.0-esp32-20240318/openocd-esp32-linux-amd64-0.12.0-esp32-20240318.tar.gz
+tar -xf openocd-esp32-linux-amd64-0.12.0-esp32-20240318.tar.gz
+rm openocd-esp32-linux-amd64-0.12.0-esp32-20240318.tar.gz
+echo 'export PATH=$PATH:/home/zephyr/openocd-esp32/bin' >> ~/.zshrc
+source ~/.zshrc
+```
+
+Note: Illl add it to the Dockerfile.
+
+That means it's connected. Then hit F5 in VS Code.
+ 
+Package includes:
+ 
+1 x ESP-Prog Development Board
+
+
+
 
 **3. Add to `prj.conf` or `debug.conf`:**
 ```conf
@@ -343,8 +468,6 @@ west build -p always -b esp32_devkitc/esp32/procpu /home/zephyr/workspace/app/ap
 ```
 
 Then in VS Code hit `F5` to build and start debugging.
-
-**One caveat:** Cortex-Debug is designed for ARM. ESP32 is Xtensa, so you may need the **ESP-IDF extension** or **OpenOCD** instead of J-Link's GDB server for full support. Want me to set up the OpenOCD path too?
 
 ---
 
