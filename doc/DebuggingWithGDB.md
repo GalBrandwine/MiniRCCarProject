@@ -208,6 +208,60 @@ West flashes directly to `0x1000`. The ESP32 ROM bootloader reads the image head
 
 ### Flash Layout — With MCUboot
 
+First we need to tell Zephyr to build our image to contain both our app and MCUboot - simply add `--sysbuild` to the west build command.
+
+```bash
+west build --sysbuild -p always -b esp32_devkitc/esp32/procpu /home/zephyr/workspace/app/app -- -DEXTRA_CONF_FILE=debug.conf
+```
+
+Later on, MCUboot requires a signed image to properly to accept it and load it to memory.
+
+So we create a pen key:
+```bash
+../bootloader/mcuboot/scripts/imgtool.py keygen -k mcu_root_key.pem -t ecdsa-p256
+```
+
+Then we need to modify our `prj.conf` to contain both the  `pem` key, and an BOOTLOADER_MCUBOOT config:
+
+```text
+# Copyright (c) 2021 Nordic Semiconductor ASA
+# SPDX-License-Identifier: Apache-2.0
+#
+# This file contains selected Kconfig options for the application.
+
+CONFIG_SENSOR=y
+CONFIG_2CH_REMOTE_CONTROLL=y
+CONFIG_BOOTLOADER_MCUBOOT=y
+CONFIG_MCUBOOT_SIGNATURE_KEY_FILE="mcu_root_key.pem"
+```
+
+I got stuck here.
+Flashing an image with MCUboot to the ESP is not straight forward, the image starts, selects the propper image.0 but then get stuck:
+
+```bash
+rst:0x1 (POWERON_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+configsip: 0, SPIWP:0xee
+clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+mode:DIO, clock div:2
+load:0x3ffe8000,len:7296
+load:0x40078000,len:2860
+load:0x400a0000,len:29044
+entry 0x400a1a38
+I (soc_init): MCUboot 2nd stage bootloader
+I (soc_init): compile time Jun 15 2026 21:58:16
+W (soc_init): Unicore bootloader
+I (soc_init): chip revision: v3.0
+I (flash_init): SPI Speed      : 40MHz
+I (flash_init): SPI Mode       : DIO
+I (flash_init): SPI Flash Size : 4MB
+I (boot): Loading image 0 - slot 0 from flash, area id: 2
+I (boot): Application start=40089830h
+I (boot): DRAM  : lma=00030254h vma=3ffb0000h size=016e4h (  5860) load
+I (boot): IRAM  : lma=000200a8h vma=40080000h size=101ach ( 65964) load
+```
+
+For some reason - the `debug.conf` broke MCUBOOT - Ill investigate it later...
+
 ```text
 0x0000  ROM bootloader (built into chip)
 0x1000  MCUboot bootloader
