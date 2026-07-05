@@ -21,10 +21,10 @@
 	// 	blink-period-ms = <1000>;
 	// };
 
-	remote_controll: remote-controll {
-		compatible = "remote-controll-gpio-2ch";
-		left-gpios = <&gpio 0 GPIO_ACTIVE_LOW>;
-		right-gpios = <&gpio 4 GPIO_ACTIVE_LOW>;
+	remote_control: remote-control-gpio-2ch {
+		compatible = "brandwine,remote-control-gpio-2ch";
+		left-gpios = <&gpio 2 GPIO_ACTIVE_HIGH>;
+		right-gpios = <&gpio 4 GPIO_ACTIVE_HIGH>;
 	};
 };
 

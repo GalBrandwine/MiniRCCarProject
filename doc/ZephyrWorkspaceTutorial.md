@@ -11,11 +11,11 @@ using Docker, structured as a proper West T2 workspace application.
 
 Zephyr has three ways to structure an application. This tutorial uses the **workspace application** (T2 topology) — the recommended approach for real projects.
 
-| Type | Where your app lives |
-|---|---|
-| Repository app | Inside the `zephyr/` repo itself |
+| Type                   | Where your app lives                          |
+| ---------------------- | --------------------------------------------- |
+| Repository app         | Inside the `zephyr/` repo itself              |
 | **Workspace app (T2)** | **Alongside `zephyr/` in the west workspace** |
-| Freestanding app | Completely outside the workspace |
+| Freestanding app       | Completely outside the workspace              |
 
 ### The T2 Workspace Layout
 
@@ -67,6 +67,7 @@ Your repo now has the correct structure: `app/`, `boards/`, `drivers/`, `west.ym
 ## Step 2 — The Dockerfile
 
 The Dockerfile builds an image containing everything **except** your application code:
+
 - Ubuntu 24.04 base
 - All Zephyr system dependencies
 - Python venv + `west`
@@ -82,6 +83,7 @@ ARG ZEPHYR_SDK_TOOLCHAINS="-t arm-zephyr-eabi -t xtensa-espressif_esp32_zephyr-e
 
 **Workspace bootstrap** — the image bootstraps using the upstream Zephyr manifest
 so all base modules are pre-fetched and cached in the image layer:
+
 ```dockerfile
 RUN west init --mr ${ZEPHYR_VERSION} /home/zephyr/workspace \
     && cd /home/zephyr/workspace \
@@ -91,6 +93,7 @@ RUN west init --mr ${ZEPHYR_VERSION} /home/zephyr/workspace \
 ```
 
 **Working directory** — set to the workspace root, not your app:
+
 ```dockerfile
 WORKDIR /home/zephyr/workspace
 ```
@@ -117,6 +120,7 @@ services:
 ```
 
 For flashing over USB, add device passthrough:
+
 ```yaml
     # devices:
     #   - /dev/ttyUSB0:/dev/ttyUSB0      # adjust to ttyACM0 if needed
@@ -215,7 +219,7 @@ west packages pip --install
 
 ---
 
-## Step 7 — Build
+## Step 7 — Basic Build
 
 ```bash
 # From /home/zephyr/workspace (the working_dir set in compose.yaml)
@@ -259,36 +263,38 @@ west flash --esp-device /dev/ttyUSB0
 
 ## Debugging within the container
 
-### SEGGER JLINK's Configuringn.
+### SEGGER JLINK's Configuringn
 
-I have J-Link at home. But it supports only ESP32-3C via JTAG. 
+I have J-Link at home. But it supports only ESP32-3C via JTAG.
 Ill keep the full setup here if needed next time:
 
 **1. Wire J-Link to ESP32 DevKitC**
 
-| J-Link Pin | ESP32 GPIO | Function |
-|---|---|---|
-| TDI | GPIO12 | JTAG TDI |
-| TDO | GPIO15 | JTAG TDO |
-| TCK | GPIO13 | JTAG TCK |
-| TMS | GPIO14 | JTAG TMS |
-| GND | GND | Ground |
-| VTref | 3.3V | Reference voltage |
+| J-Link Pin | ESP32 GPIO | Function          |
+| ---------- | ---------- | ----------------- |
+| TDI        | GPIO12     | JTAG TDI          |
+| TDO        | GPIO15     | JTAG TDO          |
+| TCK        | GPIO13     | JTAG TCK          |
+| TMS        | GPIO14     | JTAG TMS          |
+| GND        | GND        | Ground            |
+| VTref      | 3.3V       | Reference voltage |
 
 **2. Install J-Link software in the container:**
+
 ```bash
 # Check if JLinkGDBServer is already available
 which JLinkGDBServer
 ```
 
 If not:
+
 ```bash
 wget -q https://www.segger.com/downloads/jlink/JLink_Linux_x86_64.tgz
 tar -xf JLink_Linux_x86_64.tgz
 sudo cp -r JLink_Linux_x86_64/* /usr/local/
 ```
-**One caveat:** Cortex-Debug is designed for ARM. ESP32 is Xtensa, so you may need the **ESP-IDF extension** or **OpenOCD** instead of J-Link's GDB server for full support.
 
+**One caveat:** Cortex-Debug is designed for ARM. ESP32 is Xtensa, so you may need the **ESP-IDF extension** or **OpenOCD** instead of J-Link's GDB server for full support.
 
 ### ESP-PROG Configuration
 
@@ -297,33 +303,36 @@ sudo cp -r JLink_Linux_x86_64/* /usr/local/
 I've bought this [ESP32-programmer](https://he.aliexpress.com/item/4001296786022.html?spm=a2g0o.order_list.order_list_main.41.67b41802sdK85M&gatewayAdapt=glo2isr)
 
 It Features:
- 
+
 1. ESP-Prog is a development and debugging tool with automatic download firmware, serial communication, JTAG online debugging and other functions. The automatic download firmware and serial communication functions are available for the ESP8266 and ESP32 platforms, and the JTAG in-circuit debugging function is available for the ESP32 platform.
 2. ESP-Prog is easy to use and can be connected to a computer with only one USB cable. The computer can recognize the download function and the two ports corresponding to the JTAG function.
 3. ESP-Prog can be connected to the user board using the cable. The connector is available in 2.54 mm and 1.27 mm pitch packages with a foolproof design. The user board is required to place the Program (6-Pin) and JTAG (10-Pin) connectors in the corresponding order.
 4. Considering that the power supply voltage of different user boards may be different, the two interfaces of ESP-Prog can select 5V or 3.3V power supply through Pin Header, which has strong power compatibility.
- 
+
 Product description:
- 
+
 Size: 73.4mm * 25.1mm
 Interface: Program; JTAG
- 
+
 Steps for usage:
- 
+
 1. Connect the ESP-Prog debug board and the USB port on the computer via a USB cable.
 2. Install the FT2232HL chip driver on the computer side. The computer recognizes two ports, indicating that the driver has been successfully installed.
 3. Use the Pin header to select the power supply output voltage on the Program/JTAG interface.
 4. Connect the debug board and ESP product board with the gray cable.
 5. Automatic download and JTAG debugging of the ESP32 product board can be achieved using official software tools or scripts.
 
-Some good Good news — ESP-PROG is natively supported by OpenOCD with no extra setup needed. 
+Some good Good news — ESP-PROG is natively supported by OpenOCD with no extra setup needed.
 Here's what to do:
 
 **Step 1 — Verify the container sees it:**
+
 ```bash
 ls /dev/ttyUSB*
 ```
+
 You should see two ports — `ttyUSB0` and `ttyUSB1` and `ttyUSB2`. ESP-PROG creates two:
+
 - `ttyUSB0` — ESP32 (Maybe need to disconnect)
 - `ttyUSB1` — JTAG
 - `ttyUSB2` — UART (serial/flash)
@@ -336,9 +345,11 @@ set ESP_ONLYCPU 1
 source [find interface/ftdi/esp32_devkitj_v1.cfg]
 source [find target/esp32.cfg]
 ```
+
 This is the config that was originally in the Zephyr board support — it was written exactly for ESP-PROG.
 
 **Step 3 — Update `launch.json`:**
+
 ```json
 {
   "version": "0.2.0",
@@ -368,24 +379,35 @@ This is the config that was originally in the Zephyr board support — it was wr
 
 **Step 4 — Wire ESP-PROG to NodeMCU:**
 
-| ESP-PROG JTAG | NodeMCU |
-|---|---|
-| VDD (3.3V) | 3.3V |
-| GND | GND |
-| TDI | GPIO12 |
-| TDO | GPIO15 |
-| TCK | GPIO13 |
-| TMS | GPIO14 |
-| EN | EN (optional) |
+| ESP-PROG JTAG | NodeMCU       |
+| ------------- | ------------- |
+| VDD (3.3V)    | 3.3V          |
+| GND           | GND           |
+| TDI           | GPIO12        |
+| TDO           | GPIO15        |
+| TCK           | GPIO13        |
+| TMS           | GPIO14        |
+| EN            | EN (optional) |
 
 **Step 5 — Test OpenOCD manually first:**
+
 ```bash
 /home/zephyr/openocd-esp32/bin/openocd \
   -s /home/zephyr/openocd-esp32/share/openocd/scripts \
   -f /home/zephyr/workspace/app/.vscode/esp32-esprog.cfg
+
+# Expanded version
+openocd \
+  -s /home/zephyr/openocd-esp32/share/openocd/scripts \
+  -f /home/zephyr/workspace/app/.vscode/esp32-esprog.cfg \
+  -c "init" \
+  -c "reset halt" \
+  # -c "esp appimage_offset 0x1000"  # When debugging image with app only
+  -c "esp appimage_offset 0x20000"  # When debugging image with mcuboot & app
 ```
 
 You should see:
+
 ```
 Info : esp32.cpu0: hardware has 2 breakpoints, 2 watchpoints
 ```
@@ -404,15 +426,13 @@ source ~/.zshrc
 Note: Illl add it to the Dockerfile.
 
 That means it's connected. Then hit F5 in VS Code.
- 
+
 Package includes:
- 
+
 1 x ESP-Prog Development Board
 
-
-
-
 **3. Add to `prj.conf` or `debug.conf`:**
+
 ```conf
 CONFIG_DEBUG_OPTIMIZATIONS=y
 CONFIG_LOG=y
@@ -420,12 +440,13 @@ CONFIG_APP_LOG_LEVEL_DBG=y
 ```
 
 **4. Build with debug config:**
+
 ```bash
-west build -p always -b esp32_devkitc/esp32/procpu /home/zephyr/workspace/app/app \
-  -- -DEXTRA_CONF_FILE=debug.conf
+west build -p always -b esp32_devkitc/esp32/procpu /home/zephyr/workspace/app/app -- -DEXTRA_CONF_FILE=debug.conf
 ```
 
 **5. Create `.vscode/launch.json` in your project:**
+
 ```json
 {
   "version": "0.2.0",
@@ -449,6 +470,7 @@ west build -p always -b esp32_devkitc/esp32/procpu /home/zephyr/workspace/app/ap
 ```
 
 **6. Add `.vscode/tasks.json` for the build task:**
+
 ```json
 {
   "version": "2.0.0",
@@ -471,12 +493,16 @@ Then in VS Code hit `F5` to build and start debugging.
 
 ---
 
+### Building with MCUboot
+
+---
+
 ## Troubleshooting
 
-| Error | Cause | Fix |
-|---|---|---|
-| `ESP_IDF_PATH is not set` | `hal_espressif` blobs not fetched | `west blobs fetch hal_espressif` |
-| `Unknown module(s): {'hal_espressif'}` | west still using upstream manifest | `west config manifest.path app && west update` |
-| `hal_espressif` not fetched by `west update` | missing from `name-allowlist` in `west.yml` | Add `- hal_espressif` to the allowlist |
-| Board name warning about `esp32_devkitc_wroom` | Renamed in Zephyr 4.x | Use `esp32_devkitc/esp32/procpu` |
-| Toolchain not found for Xtensa | SDK built with ARM only | Add `-t xtensa-espressif_esp32_zephyr-elf` to `ZEPHYR_SDK_TOOLCHAINS` and rebuild image |
+| Error                                          | Cause                                       | Fix                                                                                     |
+| ---------------------------------------------- | ------------------------------------------- | --------------------------------------------------------------------------------------- |
+| `ESP_IDF_PATH is not set`                      | `hal_espressif` blobs not fetched           | `west blobs fetch hal_espressif`                                                        |
+| `Unknown module(s): {'hal_espressif'}`         | west still using upstream manifest          | `west config manifest.path app && west update`                                          |
+| `hal_espressif` not fetched by `west update`   | missing from `name-allowlist` in `west.yml` | Add `- hal_espressif` to the allowlist                                                  |
+| Board name warning about `esp32_devkitc_wroom` | Renamed in Zephyr 4.x                       | Use `esp32_devkitc/esp32/procpu`                                                        |
+| Toolchain not found for Xtensa                 | SDK built with ARM only                     | Add `-t xtensa-espressif_esp32_zephyr-elf` to `ZEPHYR_SDK_TOOLCHAINS` and rebuild image |

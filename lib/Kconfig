@@ -4,5 +4,6 @@
 menu "Custom libraries"
 
 rsource "custom/Kconfig"
+rsource "rc_car/Kconfig"
 
 endmenu

@@ -1,0 +1,27 @@
+# Copyright (c) 2021, Legrand North America, LLC.
+# SPDX-License-Identifier: Apache-2.0
+
+config RC_CAR
+	bool "Support for the remote-contoll car library"
+	help
+	  This option enables the 'rc_car' library
+
+config RC_CAR_GET_VALUE_DEFAULT
+	int "custom_get_value() default return value"
+	depends on RC_CAR
+	default 0
+	help
+	  This option primarily exists as an example of a library Kconfig
+	  setting.
+
+	  This option specifies the value for custom_get_value() to return
+	  when the input parameter is zero. (Otherwise the function returns the
+	  input parameter value.)
+
+if RC_CAR
+
+module = RC_CAR
+module-str = rc_car
+source "subsys/logging/Kconfig.template.log_config"
+
+endif # RC_CAR

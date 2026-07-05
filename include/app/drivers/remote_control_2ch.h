@@ -3,14 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef APP_DRIVERS_2CH_REMOTE_CONTROLL_H_
-#define APP_DRIVERS_2CH_REMOTE_CONTROLL_H_
+#ifndef APP_DRIVERS_2CH_REMOTE_CONTROL_H_
+#define APP_DRIVERS_2CH_REMOTE_CONTROL_H_
 
 #include <zephyr/device.h>
 #include <zephyr/toolchain.h>
 
 /**
- * @defgroup drivers_2ch_remote_controll 2CH Remote Control drivers
+ * @defgroup drivers_2ch_remote_control 2CH Remote Control drivers
  * @ingroup drivers
  * @{
  *
@@ -35,7 +35,7 @@
  */
 
 /** @brief Blink driver class operations */
-__subsystem struct remote_controll_2ch_driver_api
+__subsystem struct remote_control_2ch_driver_api
 {
 	// /**
 	//  * @brief Configure the LED blink period.
@@ -53,7 +53,7 @@ __subsystem struct remote_controll_2ch_driver_api
 	/**
 	 * @brief Turn the remote control left.
 	 *
-	 * @param dev 2ch_remote_controll device instance.
+	 * @param dev 2ch_remote_control device instance.
 	 *
 	 * @retval 0 if successful.
 	 * @retval -EINVAL if @p period_ms can not be set.
@@ -63,7 +63,7 @@ __subsystem struct remote_controll_2ch_driver_api
 	/**
 	 * @brief Turn the remote control right.
 	 *
-	 * @param dev 2ch_remote_controll device instance.
+	 * @param dev 2ch_remote_control device instance.
 	 *
 	 * @retval 0 if successful.
 	 * @retval -EINVAL if @p period_ms can not be set.
@@ -73,7 +73,7 @@ __subsystem struct remote_controll_2ch_driver_api
 	/**
 	 * @brief Center the remote control.
 	 *
-	 * @param dev 2ch_remote_controll device instance.
+	 * @param dev 2ch_remote_control device instance.
 	 *
 	 * @retval 0 if successful.
 	 * @retval -EINVAL if @p period_ms can not be set.
@@ -86,4 +86,4 @@ __subsystem struct remote_controll_2ch_driver_api
 
 /** @} */
 
-#endif /* APP_DRIVERS_2CH_REMOTE_CONTROLL_H_ */
+#endif /* APP_DRIVERS_2CH_REMOTE_CONTROL_H_ */

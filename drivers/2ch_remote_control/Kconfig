@@ -1,0 +1,23 @@
+# Copyright (c) 2024 Nordic Semiconductor ASA
+# SPDX-License-Identifier: Apache-2.0
+
+menuconfig 2CH_REMOTE_CONTROL
+	bool "2ch remote-control driver"
+	help
+	  This option enables the 2ch remote-control custom driver class.
+
+if 2CH_REMOTE_CONTROL
+
+config 2CH_REMOTE_CONTROL_INIT_PRIORITY
+	int "2ch remote control device drivers init priority"
+	default KERNEL_INIT_PRIORITY_DEVICE
+	help
+	  2ch remote control device drivers init priority.
+
+module = 2CH_REMOTE_CONTROL
+module-str = 2ch_remote_control
+source "subsys/logging/Kconfig.template.log_config"
+
+rsource "Kconfig.gpio_led"
+
+endif # 2CH_REMOTE_CONTROL

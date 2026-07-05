@@ -13,7 +13,7 @@ description: |
         blink-period-ms = <1000>;
     };
 
-compatible: "2ch-remote-controll"
+compatible: "2ch-remote-control"
 
 include: base.yaml
 

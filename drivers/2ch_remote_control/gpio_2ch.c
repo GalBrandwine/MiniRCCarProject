@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#define DT_DRV_COMPAT remote_controll_gpio_2ch
+#define DT_DRV_COMPAT brandwine_remote_control_gpio_2ch
 
 #include <zephyr/device.h>
 #include <zephyr/devicetree.h>
@@ -11,11 +11,11 @@
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
 
-#include <app/drivers/remote_controll_2ch.h>
+#include <app/drivers/remote_control_2ch.h>
 
-LOG_MODULE_REGISTER(2ch_remote_controll, CONFIG_2CH_REMOTE_CONTROLL_LOG_LEVEL);
+LOG_MODULE_REGISTER(2ch_remote_control, CONFIG_2CH_REMOTE_CONTROL_LOG_LEVEL);
 
-struct remote_controll_2ch_gpio_config
+struct remote_control_2ch_gpio_config
 {
 	struct gpio_dt_spec left;
 	struct gpio_dt_spec right;
@@ -23,9 +23,9 @@ struct remote_controll_2ch_gpio_config
 
 /* ── API implementation ─────────────────────────────────────────────────── */
 
-static int remote_controll_2ch_gpio_turn_left(const struct device *dev)
+static int remote_control_2ch_gpio_turn_left(const struct device *dev)
 {
-	const struct remote_controll_2ch_gpio_config *config = dev->config;
+	const struct remote_control_2ch_gpio_config *config = dev->config;
 	int ret;
 
 	LOG_DBG("Turning left");
@@ -47,9 +47,9 @@ static int remote_controll_2ch_gpio_turn_left(const struct device *dev)
 	return 0;
 }
 
-static int remote_controll_2ch_gpio_turn_right(const struct device *dev)
+static int remote_control_2ch_gpio_turn_right(const struct device *dev)
 {
-	const struct remote_controll_2ch_gpio_config *config = dev->config;
+	const struct remote_control_2ch_gpio_config *config = dev->config;
 	int ret;
 
 	LOG_DBG("Turning right");
@@ -71,9 +71,9 @@ static int remote_controll_2ch_gpio_turn_right(const struct device *dev)
 	return 0;
 }
 
-static int remote_controll_2ch_gpio_center(const struct device *dev)
+static int remote_control_2ch_gpio_center(const struct device *dev)
 {
-	const struct remote_controll_2ch_gpio_config *config = dev->config;
+	const struct remote_control_2ch_gpio_config *config = dev->config;
 	int ret;
 
 	LOG_DBG("Centering");
@@ -95,17 +95,17 @@ static int remote_controll_2ch_gpio_center(const struct device *dev)
 	return 0;
 }
 
-static DEVICE_API(remote_controll_2ch, remote_controll_2ch_api) = {
-	.turn_left = remote_controll_2ch_gpio_turn_left,
-	.turn_right = remote_controll_2ch_gpio_turn_right,
-	.center = remote_controll_2ch_gpio_center,
+static DEVICE_API(remote_control_2ch, remote_control_2ch_api) = {
+	.turn_left = remote_control_2ch_gpio_turn_left,
+	.turn_right = remote_control_2ch_gpio_turn_right,
+	.center = remote_control_2ch_gpio_center,
 };
 
 /* ── Init ───────────────────────────────────────────────────────────────── */
 
-static int remote_controll_2ch_gpio_data_init(const struct device *dev)
+static int remote_control_2ch_gpio_data_init(const struct device *dev)
 {
-	const struct remote_controll_2ch_gpio_config *config = dev->config;
+	const struct remote_control_2ch_gpio_config *config = dev->config;
 	int ret;
 
 	LOG_INF("Initialising 2ch remote control driver");
@@ -145,19 +145,19 @@ static int remote_controll_2ch_gpio_data_init(const struct device *dev)
 
 /* ── Device instantiation ───────────────────────────────────────────────── */
 
-#define REMOTE_CONTROLL_2CH_DEFINE(inst)                                 \
-	static const struct remote_controll_2ch_gpio_config config##inst = { \
-		.left = GPIO_DT_SPEC_INST_GET(inst, left_gpios),                 \
-		.right = GPIO_DT_SPEC_INST_GET(inst, right_gpios),               \
-	};                                                                   \
-                                                                         \
-	DEVICE_DT_INST_DEFINE(inst,                                          \
-						  remote_controll_2ch_gpio_data_init,            \
-						  NULL,                                          \
-						  NULL,                                          \
-						  &config##inst,                                 \
-						  POST_KERNEL,                                   \
-						  CONFIG_2CH_REMOTE_CONTROLL_INIT_PRIORITY,      \
-						  &remote_controll_2ch_api);
+#define REMOTE_CONTROL_2CH_DEFINE(inst)                                 \
+	static const struct remote_control_2ch_gpio_config config##inst = { \
+		.left = GPIO_DT_SPEC_INST_GET(inst, left_gpios),                \
+		.right = GPIO_DT_SPEC_INST_GET(inst, right_gpios),              \
+	};                                                                  \
+                                                                        \
+	DEVICE_DT_INST_DEFINE(inst,                                         \
+						  remote_control_2ch_gpio_data_init,            \
+						  NULL,                                         \
+						  NULL,                                         \
+						  &config##inst,                                \
+						  POST_KERNEL,                                  \
+						  CONFIG_2CH_REMOTE_CONTROL_INIT_PRIORITY,      \
+						  &remote_control_2ch_api);
 
-DT_INST_FOREACH_STATUS_OKAY(REMOTE_CONTROLL_2CH_DEFINE)
+DT_INST_FOREACH_STATUS_OKAY(REMOTE_CONTROL_2CH_DEFINE)

@@ -65,7 +65,7 @@ These bytes are only overridden if this is a bootloader image (an image written 
     - Scanned flash with `esptool read-flash` looking for `0xE9` magic byte
     - Found app at `0x1000` — set `esp appimage_offset 0x1000` in OpenOCD launch.
     Solved that using:
-    
+
     ```bash
     # Note: this is image-info of an app buildt with --sysbuild, thus containg MCUBOOT
     $ esptool image-info ./build/mcuboot/zephyr/zephyr.bin 
@@ -103,7 +103,6 @@ These bytes are only overridden if this is a bootloader image (an image written 
     Checksum: 0x07 (valid)
     Validation hash: 7ddac7bf91abb6c3cfeb44f88707af98a24c9c568736879f64856b57a8513503 (valid)
     ```
-
 
 ---
 
@@ -202,7 +201,7 @@ MCUboot sits between the ESP32 ROM bootloader and my app. It provides:
 0x8000  Partition table
 ```
 
-West flashes directly to `0x1000`. The ESP32 ROM bootloader reads the image header at `0x1000` and jumps straight into my app. Simple and fast.
+West flashes directly to `0x1000`. The ESP32 ROM bootloader reads the image header at `0x1000` and jumps straight into my app.
 
 ---
 
@@ -214,9 +213,10 @@ First we need to tell Zephyr to build our image to contain both our app and MCUb
 west build --sysbuild -p always -b esp32_devkitc/esp32/procpu /home/zephyr/workspace/app/app -- -DEXTRA_CONF_FILE=debug.conf
 ```
 
-Later on, MCUboot requires a signed image to properly to accept it and load it to memory.
+[Optional] Later on, MCUboot requires a signed image to properly to accept it and load it to memory.
 
 So we create a pen key:
+
 ```bash
 ../bootloader/mcuboot/scripts/imgtool.py keygen -k mcu_root_key.pem -t ecdsa-p256
 ```
@@ -230,8 +230,9 @@ Then we need to modify our `prj.conf` to contain both the  `pem` key, and an BOO
 # This file contains selected Kconfig options for the application.
 
 CONFIG_SENSOR=y
-CONFIG_2CH_REMOTE_CONTROLL=y
+CONFIG_2CH_REMOTE_CONTROL=y
 CONFIG_BOOTLOADER_MCUBOOT=y
+# Not mandatody
 CONFIG_MCUBOOT_SIGNATURE_KEY_FILE="mcu_root_key.pem"
 ```
 
@@ -257,7 +258,7 @@ I (flash_init): SPI Flash Size : 4MB
 I (boot): Loading image 0 - slot 0 from flash, area id: 2
 I (boot): Application start=40089830h
 I (boot): DRAM  : lma=00030254h vma=3ffb0000h size=016e4h (  5860) load
-I (boot): IRAM  : lma=000200a8h vma=40080000h size=101ach ( 65964) load
+I (boot): IRAM  : lma=000200a8h vma=40080000h size=101ach ( 65964) load <------ Stuck.
 ```
 
 For some reason - the `debug.conf` broke MCUBOOT - Ill investigate it later...
