@@ -1,0 +1,21 @@
+# Possible commands:
+# Built only a testcase: west build -p -b esp32_devkitc/esp32/procpu tests/lib/rc_car -T rc_car.default
+#
+# NOTE: Got flashing timeout when tryied to run the tests from -
+#   west twister -T tests/lib/rc_car -p esp32_devkitc/esp32/procpu  --device-testing --device-serial /dev/ttyUSB0
+#
+# When flashing manually with `west flash --esp-device /dev/ttyUSB0` - we can see the tests running and passing in the Serial console output.
+common:
+  tags: extensibility
+  # extra_overlay_confs:
+    # - /home/zephyr/workspace/app/app/boards/esp32_devkitc_procpu.overlay
+  extra_dtc_overlay_files:
+    - /home/zephyr/workspace/app/app/boards/esp32_devkitc_procpu.overlay
+  integration_platforms:
+    - esp32_devkitc/esp32/procpu
+tests:
+  rc_car.default:
+    tags: rc_car
+    platform_allow:
+      - esp32_devkitc/esp32/procpu
+      - native_sim
