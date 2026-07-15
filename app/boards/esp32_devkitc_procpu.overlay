@@ -9,6 +9,7 @@
  * by Zephyr.
  */
 
+#include <zephyr/dt-bindings/input/input-event-codes.h>
 / {
 	// example_sensor: example-sensor {
 	// 	compatible = "zephyr,example-sensor";
@@ -21,11 +22,31 @@
 	// 	blink-period-ms = <1000>;
 	// };
 
+	/*
+	An ESP32 DevKit exposes about 25 of its 48 GPIO pins. While highly versatile, certain pins are restricted due to internal flash, boot strapping, or input-only constraints. For safety and reliability, use the free GPIOs (e.g., 13, 14, 25-27, 32, 33) first.
+	See - https://randomnerdtutorials.com/esp32-pinout-reference-gpios/
+	*/
 	remote_control: remote-control-gpio-2ch {
 		compatible = "brandwine,remote-control-gpio-2ch";
 		left-gpios = <&gpio 2 GPIO_ACTIVE_HIGH>;
 		right-gpios = <&gpio 4 GPIO_ACTIVE_HIGH>;
 	};
+
+	buttons {
+		compatible = "gpio-keys";
+
+		button0: button_0 {
+			gpios = <&gpio 16 (GPIO_PULL_UP | GPIO_ACTIVE_LOW)>;
+			label = "Steer Left button";
+			zephyr,code = <INPUT_KEY_0>;
+		};
+		button1: button_1 {
+			gpios = <&gpio 17 (GPIO_PULL_UP | GPIO_ACTIVE_LOW)>;
+			label = "Steer Right button";
+			zephyr,code = <INPUT_KEY_1>;
+		};
+	};
 };
+
 
 

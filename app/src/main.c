@@ -6,7 +6,6 @@
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
 #include <app/lib/rc_car.h>
-// #include <app/drivers/remote_control_2ch.h>
 
 #include <app_version.h>
 
@@ -24,29 +23,30 @@ int main(void)
 		return 0;
 	}
 
-	while (1)
-	{
-		LOG_INF("");
-		LOG_INF("Turning left");
-		rc_car_turn_left();
-		// DEVICE_API_GET(remote_control_2ch, remote_control_2ch_dev)->turn_left(remote_control_2ch_dev);
-		k_sleep(K_MSEC(1000));
+	k_sleep(K_FOREVER);
+	// while (1)
+	// {
+	// 	LOG_INF("");
+	// 	LOG_INF("Turning left");
+	// 	rc_car_turn_left();
+	// 	// DEVICE_API_GET(remote_control_2ch, remote_control_2ch_dev)->turn_left(remote_control_2ch_dev);
+	// 	k_sleep(K_MSEC(1000));
 
-		LOG_INF("Centering");
-		// DEVICE_API_GET(remote_control_2ch, remote_control_2ch_dev)->center(remote_control_2ch_dev);
-		rc_car_center_wheels();
-		k_sleep(K_MSEC(1000));
+	// 	LOG_INF("Centering");
+	// 	// DEVICE_API_GET(remote_control_2ch, remote_control_2ch_dev)->center(remote_control_2ch_dev);
+	// 	rc_car_center_wheels();
+	// 	k_sleep(K_MSEC(1000));
 
-		LOG_INF("Turning right");
-		rc_car_turn_right();
-		// DEVICE_API_GET(remote_control_2ch, remote_control_2ch_dev)->turn_right(remote_control_2ch_dev);
-		k_sleep(K_MSEC(1000));
+	// 	LOG_INF("Turning right");
+	// 	rc_car_turn_right();
+	// 	// DEVICE_API_GET(remote_control_2ch, remote_control_2ch_dev)->turn_right(remote_control_2ch_dev);
+	// 	k_sleep(K_MSEC(1000));
 
-		LOG_INF("Centering");
-		// DEVICE_API_GET(remote_control_2ch, remote_control_2ch_dev)->center(remote_control_2ch_dev);
-		rc_car_center_wheels();
-		k_sleep(K_MSEC(1000));
-	}
+	// 	LOG_INF("Centering");
+	// 	// DEVICE_API_GET(remote_control_2ch, remote_control_2ch_dev)->center(remote_control_2ch_dev);
+	// 	rc_car_center_wheels();
+	// 	k_sleep(K_MSEC(1000));
+	// }
 
 	return 0;
 }
