@@ -60,6 +60,66 @@ int rc_car_turn_right(void);
  */
 int rc_car_center_wheels(void);
 
+/**
+ * Steering status enum exposed for tests and callers.
+ */
+enum CAR_STEERING
+{
+    CENTERED,
+    TURN_LEFT,
+    TURN_RIGHT,
+};
+
+/**
+ * Acceleration status enum exposed for tests and callers.
+ */
+enum CAR_ACCELERATION
+{
+    FORWARD,
+    BACKWARD,
+    STOPPED,
+};
+
+/**
+ * Get current steering status.
+ */
+enum CAR_STEERING rc_car_get_steering_status(void);
+
+/**
+ * Get current acceleration status.
+ */
+enum CAR_ACCELERATION rc_car_get_acceleration_status(void);
+
+static const char *car_acceleration_to_str(enum CAR_ACCELERATION status)
+{
+    switch (status)
+    {
+    case FORWARD:
+        return "forward";
+    case BACKWARD:
+        return "backward";
+    case STOPPED:
+        return "stopped";
+    default:
+        return "NOT_SUPPORTED";
+    }
+}
+
+static const char *car_steering_to_str(enum CAR_STEERING status)
+{
+    switch (status)
+    {
+    case CENTERED:
+        return "centered";
+    case TURN_LEFT:
+        return "turning left";
+    case TURN_RIGHT:
+        return "turning right";
+    default:
+        return "NOT_SUPPORTED";
+    }
+}
+
 /** @} */
 
 #endif /* APP_LIB_RC_CAR_H_ */

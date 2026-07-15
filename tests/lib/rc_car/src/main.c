@@ -26,9 +26,47 @@ ZTEST(rc_car_tests, test_turn_left)
 
 	ret = rc_car_init(dev);
 	zassert_equal(ret, 0, "rc_car_init failed: %d", ret);
+	zassert_equal(rc_car_get_steering_status(), CENTERED, "steering should be CENTERED after init");
+	zassert_equal(rc_car_get_acceleration_status(), STOPPED, "acceleration should be STOPPED after init");
 
 	ret = rc_car_turn_left();
 	zassert_equal(ret, 0, "turn_left failed: %d", ret);
+	zassert_equal(rc_car_get_steering_status(), TURN_LEFT, "steering should be TURN_LEFT after turn_left");
+}
+
+ZTEST(rc_car_tests, test_turn_right)
+{
+	const struct device *dev = DEVICE_DT_GET(DT_NODELABEL(remote_control));
+	int ret;
+
+	ret = rc_car_init(dev);
+	zassert_equal(ret, 0, "rc_car_init failed: %d", ret);
+	zassert_equal(rc_car_get_steering_status(), CENTERED, "steering should be %s after init", car_steering_to_str(CENTERED));
+	zassert_equal(rc_car_get_acceleration_status(), STOPPED, "acceleration should be %s after init", car_acceleration_to_str(STOPPED));
+
+	ret = rc_car_turn_right();
+	zassert_equal(ret, 0, "turn_right failed: %d", ret);
+	zassert_equal(rc_car_get_steering_status(), TURN_RIGHT, "steering should be %s after turn_right", car_steering_to_str(TURN_RIGHT));
+}
+
+ZTEST(rc_car_tests, test_center_wheels)
+{
+	const struct device *dev = DEVICE_DT_GET(DT_NODELABEL(remote_control));
+	int ret;
+
+	ret = rc_car_init(dev);
+	zassert_equal(ret, 0, "rc_car_init failed: %d", ret);
+	zassert_equal(rc_car_get_steering_status(), CENTERED, "steering should be %s after init", car_steering_to_str(CENTERED));
+	zassert_equal(rc_car_get_acceleration_status(), STOPPED, "acceleration should be %s after init", car_acceleration_to_str(STOPPED));
+
+	/* exercise center wheels after turning left to ensure sequence works */
+	ret = rc_car_turn_left();
+	zassert_equal(ret, 0, "turn_left failed: %d", ret);
+	zassert_equal(rc_car_get_steering_status(), TURN_LEFT, "steering should be %s after turn_left", car_steering_to_str(TURN_LEFT));
+
+	ret = rc_car_center_wheels();
+	zassert_equal(ret, 0, "center_wheels failed: %d", ret);
+	zassert_equal(rc_car_get_steering_status(), CENTERED, "steering should be %s after center_wheels", car_steering_to_str(CENTERED));
 }
 
 ZTEST(rc_car_tests, test_init_null_device)

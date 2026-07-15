@@ -20,50 +20,6 @@ int custom_get_value(int val)
 	return (val != 0) ? val : CONFIG_RC_CAR_GET_VALUE_DEFAULT;
 }
 
-enum CAR_ACCELERATION
-{
-	FORWARD,
-	BACKWARD,
-	STOPPED
-};
-
-static const char *car_acceleration_to_str(enum CAR_ACCELERATION status)
-{
-	switch (status)
-	{
-	case FORWARD:
-		return "forward";
-	case BACKWARD:
-		return "backward";
-	case STOPPED:
-		return "stopped";
-	default:
-		return "NOT_SUPPORTED";
-	}
-}
-
-enum CAR_STEERING
-{
-	CENTERED,
-	TURN_LEFT,
-	TURN_RIGHT
-};
-
-static const char *car_steering_to_str(enum CAR_STEERING status)
-{
-	switch (status)
-	{
-	case CENTERED:
-		return "centered";
-	case TURN_LEFT:
-		return "turning left";
-	case TURN_RIGHT:
-		return "turning right";
-	default:
-		return "NOT_SUPPORTED";
-	}
-}
-
 static struct rc_car
 {
 	enum CAR_STEERING steering_status;
@@ -120,6 +76,16 @@ int rc_car_turn_right(void)
 		return 0;
 	}
 	return ret;
+}
+
+enum CAR_STEERING rc_car_get_steering_status(void)
+{
+	return rc_car.steering_status;
+}
+
+enum CAR_ACCELERATION rc_car_get_acceleration_status(void)
+{
+	return rc_car.acceleration_status;
 }
 
 static void button_input_cb(struct input_event *evt, void *user_data)
